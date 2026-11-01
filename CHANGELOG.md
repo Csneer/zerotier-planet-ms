@@ -9,8 +9,19 @@
 
 ### Changed
 
+- Move the Web console build and runtime images to Node.js 24 LTS, and align browser CI with Node.js 24; Node.js 20 reached end of support on 2026-04-30.
 - Open secondary settings, diagnostics and raw data in responsive dialogs with keyboard focus handling, Escape/backdrop dismissal and native disclosure fallback, keeping the main page height stable.
 - Keep member details synchronized after saves and rollbacks, and present missing path observations as unknown instead of asserting a device is offline.
+
+### Fixed
+
+- Recover a failed generated-mode upgrade pinned by image digest through a private resolved Compose configuration, preserving mounts and literal environment values without attempting to retag the immutable digest; external-mode rollback remains manual.
+- Preserve unknown monitoring latency instead of converting missing or invalid values to `0 ms` in service and probe observations.
+- Reject data paths with dotenv interpolation, quoting or escape characters before installation writes configuration or creates persistent directories.
+
+### Security
+
+- Require body-parser 1.20.9 or newer in the 1.x line and qs 6.17.1 or newer in the 6.x line to address known request-parser denial-of-service advisories. Other legacy upstream dependencies still require separate compatibility work.
 
 ## [1.2.0] - 2026-10-26
 

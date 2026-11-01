@@ -50,6 +50,22 @@ echo 'FAIL: test tried to mutate Docker' >&2
 exit 99
 `, {mode: 0o755});
 
+  const unsafePathParts = ['$PLANET_PATH_TEST', '${PLANET_PATH_TEST}', '"quoted"', "'quoted'", '\\escaped'];
+  for (const source of ['cli', 'environment']) {
+    for (const [index, part] of unsafePathParts.entries()) {
+      const invalid = fixture(`unsafe-path-${source}-${index}`);
+      const data = path.join(invalid.dir, 'state-' + part);
+      const args = ['--ip', '198.51.100.23', '--configure-only'];
+      if (source === 'cli') args.push('--data-dir', data);
+      fails(run(invalid, 'install.sh', args, source === 'environment' ? {DATA_DIR: data} : {}),
+        /data directory contains unsupported characters/);
+      assert.ok(!fs.existsSync(invalid.envFile), 'reject unsafe paths before creating .env');
+      assert.ok(!fs.existsSync(data), 'reject unsafe paths before creating data directories');
+      assert.deepEqual(fs.readdirSync(invalid.dir).sort(), ['docker-compose.yml', 'install.sh', 'manage.sh']);
+    }
+  }
+  console.log('PASS: CLI and environment paths reject dotenv interpolation, quoting and escape syntax before writing state');
+
   const staged = fixture('external');
   ok(run(staged, 'install.sh', ['--ip', '198.51.100.20', '--data-dir', staged.data,
     '--planet-mode', 'external', '--root-only', '1', '--configure-only']));

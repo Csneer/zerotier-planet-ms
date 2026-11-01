@@ -122,6 +122,13 @@ function memberVersion(member, peer) {
   return null;
 }
 
+function peerLatency(peer) {
+  const value = peer && peer.latency;
+  if (typeof value !== 'number' && (typeof value !== 'string' || !value.trim())) return null;
+  const latency = Number(value);
+  return Number.isFinite(latency) && latency >= 0 ? latency : null;
+}
+
 function formatBytes(value) {
   if (!Number.isFinite(value)) return '—';
   const units = ['B', 'KiB', 'MiB', 'GiB', 'TiB'];
@@ -196,14 +203,14 @@ async function collect() {
       planet: {
         observed: Boolean(planetPeer),
         reachable: statusTools.isPlanetReachable(planetPeer),
-        latency: planetPeer && Number(planetPeer.latency) >= 0 ? Number(planetPeer.latency) : null,
+        latency: peerLatency(planetPeer),
         path: path && path.address,
         pathCount: statusTools.activePaths(planetPeer).length,
         lastActivityMs: statusTools.lastActivityMs(planetPeer, now)
       },
       probe: {
         state: probe.available ? statusTools.probeLinkState(probePeer, probeAddress, member.id) : 'unavailable',
-        latency: probePeer && Number(probePeer.latency) >= 0 ? Number(probePeer.latency) : null,
+        latency: peerLatency(probePeer),
         path: probePath && probePath.address,
         pathCount: statusTools.activePaths(probePeer).length
       }

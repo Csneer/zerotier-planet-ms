@@ -8,6 +8,7 @@ SERVICE=myztplanet
 COMPOSE_JSON=
 LAST_BACKUP=
 RESUME_SERVICE_ON_EXIT=0
+UPGRADE_ROLLBACK_CONFIG=
 
 log() {
     printf '[planet] %s\n' "$*"
@@ -23,6 +24,9 @@ die() {
 }
 
 cleanup() {
+    if [[ -n "$UPGRADE_ROLLBACK_CONFIG" ]]; then
+        rm -f -- "$UPGRADE_ROLLBACK_CONFIG" || warn "could not remove private rollback configuration: $UPGRADE_ROLLBACK_CONFIG"
+    fi
     if ((RESUME_SERVICE_ON_EXIT)); then
         warn 'an operation failed after stopping the service; attempting to resume it'
         docker compose start "$SERVICE" >/dev/null 2>&1 || true
@@ -541,9 +545,27 @@ cmd_upgrade() {
     fi
     if [[ -n "$old_id" ]]; then
         warn 'new container failed; restoring the previous image'
-        docker tag "$old_id" "$image"
-        docker compose up -d --no-build --force-recreate "$SERVICE"
+        if [[ "$image" == *@* ]]; then
+            # A digest is immutable and cannot be the target of docker tag.
+            # Reuse Compose's serialized model, which already escapes literal
+            # dollars, to retain overrides, mounts and project identity.
+            UPGRADE_ROLLBACK_CONFIG=$(mktemp "${TMPDIR:-/tmp}/planet-upgrade-rollback.XXXXXX") \
+                || die "could not prepare rollback configuration; recovery image: $rollback_tag; data backup: $LAST_BACKUP"
+            jq --arg service "$SERVICE" --arg image "$old_id" \
+                '.services[$service].image = $image' \
+                <<<"$COMPOSE_JSON" >"$UPGRADE_ROLLBACK_CONFIG" \
+                || die "could not write rollback configuration; recovery image: $rollback_tag; data backup: $LAST_BACKUP"
+            docker compose --project-directory "$ROOT_DIR" --project-name "$(config_value '.name')" \
+                -f "$UPGRADE_ROLLBACK_CONFIG" up -d --no-build --pull never --force-recreate "$SERVICE" \
+                || die "upgrade and automatic rollback startup both failed; recovery image: $rollback_tag; data backup: $LAST_BACKUP"
+        else
+            docker tag "$old_id" "$image" && docker compose up -d --no-build --force-recreate "$SERVICE" \
+                || die "upgrade and automatic rollback startup both failed; recovery image: $rollback_tag; data backup: $LAST_BACKUP"
+        fi
         wait_healthy || die "upgrade and automatic rollback both failed; data backup: $LAST_BACKUP"
+        if [[ "$image" == *@* ]]; then
+            warn "the configured digest was not changed; set ZT_IMAGE to a verified working image before the next up or upgrade (recovery image: $rollback_tag)"
+        fi
         die "upgrade failed and was rolled back; data backup: $LAST_BACKUP"
     fi
     die "upgrade failed; data backup: $LAST_BACKUP"

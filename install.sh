@@ -65,7 +65,10 @@ valid_root_ipv6() {
 }
 
 safe_env_value() {
-    [[ "$1" != *$'\n'* && "$1" != *$'\r'* && "$1" != *'#'* ]]
+    # Values are written unquoted to Compose's .env. Reject interpolation,
+    # quoting and escape syntax so the mounted path stays the requested path.
+    [[ "$1" != *$'\n'* && "$1" != *$'\r'* && "$1" != *'#'* &&
+       "$1" != *'$'* && "$1" != *'"'* && "$1" != *"'"* && "$1" != *'\'* ]]
 }
 
 public_ip="${IP_ADDR4:-}"
