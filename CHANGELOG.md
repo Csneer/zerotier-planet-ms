@@ -19,6 +19,7 @@
 
 ### Fixed
 
+- Authenticate upstream release lookups in GitHub Actions instead of relying on anonymous API requests that can fail with HTTP 403.
 - Validate advanced route, DNS and address inputs before writing Controller configuration, rejecting ambiguous IPs, malformed prefixes and incompatible address families while preserving the previous configuration on failure.
 - Recover a failed generated-mode upgrade pinned by image digest through a private resolved Compose configuration, preserving mounts and literal environment values without attempting to retag the immutable digest; external-mode rollback remains manual.
 - Preserve unknown monitoring latency instead of converting missing or invalid values to `0 ms` in service and probe observations.

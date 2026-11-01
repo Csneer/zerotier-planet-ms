@@ -122,6 +122,7 @@ jobs:
         id: version
         env:
           REQUESTED_VERSION: ${{ inputs.zerotier_version }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           if [ "$GITHUB_REF_TYPE" = tag ]; then
             [[ "$GITHUB_REF_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]
@@ -130,7 +131,7 @@ jobs:
           elif [ -n "$REQUESTED_VERSION" ]; then
             version="$REQUESTED_VERSION"
           else
-            version=$(curl -fsSL https://api.github.com/repos/zerotier/ZeroTierOne/releases/latest | jq -r .tag_name)
+            version=$(gh api repos/zerotier/ZeroTierOne/releases/latest --jq .tag_name)
           fi
           version=${version#v}
           [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
