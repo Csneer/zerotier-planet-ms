@@ -178,6 +178,8 @@ git pull --ff-only
 
 `upgrade` prepares the candidate image before downtime, creates a consistent backup, recreates the container, and waits for health. In `generated` mode it may restore the previous image after a failed health check; in `external` mode it retains the rollback tag and backup for manual review because an older image may overwrite a signed multi-root World.
 
+For a digest-pinned `generated` deployment, rollback starts the previous image ID with the existing mounts and configuration. The target digest in `.env` remains unchanged. After recovery, update `ZT_IMAGE` to a verified working image before the next `up` or `upgrade`, so the failed candidate is not started again.
+
 ## Backup, restore, and removal
 
 Consistent backup with a short service interruption:

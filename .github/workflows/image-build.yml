@@ -95,6 +95,7 @@ jobs:
           python3 tests/controller-standby.py
           node tests/ui-models.cjs
           node tests/communication-stats.cjs
+          node tests/monitor-collection.cjs
           node tests/endpoint-probes.cjs
           node tests/install-config.cjs
           node tests/root-status.cjs
@@ -200,7 +201,7 @@ jobs:
 
       - uses: actions/setup-node@v7
         with:
-          node-version: '22'
+          node-version: '24'
           cache: npm
           cache-dependency-path: tests/browser/package-lock.json
 

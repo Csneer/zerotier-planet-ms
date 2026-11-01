@@ -1,6 +1,6 @@
 # Browser regression
 
-Requires Node.js 20+, Docker access, and a locally built project image.
+Requires Node.js 24+, Docker access, and a locally built project image.
 
 ```bash
 npm ci --prefix tests/browser
