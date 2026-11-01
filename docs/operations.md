@@ -4,7 +4,7 @@
 
 本指南保留完整的安装参数、配置说明、监控口径与维护流程。以下命令默认在仓库根目录执行；示例公网地址需替换为自己的真实地址。已有数据的部署先阅读[原地升级指南](in-place-upgrade.md)，不要重新执行首次初始化。
 
-**选择版本**：`v1.2.0` 是当前正式发布版；`main` 已包含后续改动（包括成员详情弹窗与风险处理指引），不应把它们视为 `v1.2.0` 已有能力。小规格主机优先拉取已审核镜像；需要主分支功能时，选择已通过 CI 的 Git SHA 镜像或构建对应 checkout，并记录镜像 digest。
+**选择版本**：`v1.3.0` 是当前正式发布版，包含成员详情、风险处理指引和 Node.js 24 运行环境。小规格主机优先拉取正式版本镜像；需要验证后续主分支修改时，选择已通过 CI 的 Git SHA 镜像或构建对应 checkout，并记录镜像 digest。
 
 **导航**：[环境要求](#环境要求) · [首次安装](#首次安装) · [配置](#配置) · [客户端配置](#客户端配置) · [连接监控](#连接状态与监控) · [日常维护](#日常维护) · [备份与恢复](#备份与恢复) · [密码与卸载](#密码与卸载) · [安全](#安全注意事项)
 
@@ -90,7 +90,7 @@ CONTAINER_NAME=myztplanet-root-b ./install.sh --ip 203.0.113.20 \
 ./install.sh \
   --ip 203.0.113.10 \
   --pull \
-  --image ghcr.io/csneer/ms-zerotier-planet:v1.2.0
+  --image ghcr.io/csneer/ms-zerotier-planet:v1.3.0
 ```
 
 安装器的安全边界：
@@ -289,11 +289,11 @@ git pull --ff-only
 
 ## 版本与镜像发布
 
-项目采用独立的 SemVer 版本（`vX.Y.Z`）；当前版本为 `v1.2.0`，对应镜像 `ghcr.io/csneer/ms-zerotier-planet:v1.2.0`。它与 ZeroTier `1.16.2` 等运行时版本不同。变更见 [CHANGELOG](../CHANGELOG.md)，维护者的身份配置、打 tag 和 GitHub Release 步骤见[发布约定](releasing.md)。
+项目采用独立的 SemVer 版本（`vX.Y.Z`）；当前版本为 `v1.3.0`，对应镜像 `ghcr.io/csneer/ms-zerotier-planet:v1.3.0`。它与 ZeroTier `1.16.2` 等运行时版本不同。变更见 [CHANGELOG](../CHANGELOG.md)，维护者的身份配置、打 tag 和 GitHub Release 步骤见[发布约定](releasing.md)。
 
 [image-build.yml](../.github/workflows/image-build.yml) 校验脚本、Compose 和容器回归后，构建 `amd64`/`arm64` 并发布到 GHCR：
 
-- 正式 `vX.Y.Z` tag 使用该 tag 的 `.env.example` 中的 `ZT_VERSION`（`v1.2.0` 为 `1.16.2`），只发布对应项目版本镜像，不更新滚动标签。
+- 正式 `vX.Y.Z` tag 使用该 tag 的 `.env.example` 中的 `ZT_VERSION`（`v1.3.0` 为 `1.16.2`），只发布对应项目版本镜像，不更新滚动标签。
 - `main`/`master` 推送、每周计划任务和普通手动构建继续采用上游最新稳定 ZeroTier（手动构建可指定版本），生成 `latest`、ZeroTier 版本和 Git SHA 标签。
 - 需要固定实际部署内容时，记录并使用镜像 digest；版本 tag 本身不代表全部构建依赖均已锁定。
 

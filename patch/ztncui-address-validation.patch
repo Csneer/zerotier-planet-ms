@@ -1,0 +1,179 @@
+--- a/src/controllers/networkController.js
++++ b/src/controllers/networkController.js
+@@ -7,3 +7,3 @@
+ const fs = require('fs');
+-const ipaddr = require('ip-address');
++const addresses = require('../addressValidation');
+ const storage = require('node-persist');
+@@ -334,18 +334,9 @@
+ 
+-  req.checkBody('ipRangeStart', 'IP range start required').notEmpty();
+-  req.checkBody('ipRangeStart', 'IP range start needs a valid IPv4 or IPv6 address').isIP();
+-  req.sanitize('ipRangeStart').escape();
+-  req.sanitize('ipRangeStart').trim();
+-  req.checkBody('ipRangeEnd', 'IP range end required').notEmpty();
+-  req.checkBody('ipRangeEnd', 'IP range end needs a valid IPv4 or IPv6 address').isIP();
+-  req.sanitize('ipRangEnd').escape();
+-  req.sanitize('ipRangEnd').trim();
+-
+-  const errors = req.validationErrors();
+-
+-  const ipAssignmentPool =
+-    {
+-      ipRangeStart: req.body.ipRangeStart,
+-      ipRangeEnd: req.body.ipRangeEnd
+-    };
++  const ipAssignmentPool = {
++    ipRangeStart: addresses.trim(req.body.ipRangeStart),
++    ipRangeEnd: addresses.trim(req.body.ipRangeEnd)
++  };
++  const errors = addresses.validPool(ipAssignmentPool.ipRangeStart, ipAssignmentPool.ipRangeEnd)
++    ? null : [{msg: 'IP range must contain ordered addresses of the same family'}];
++  if (errors) res.status(400);
+ 
+@@ -370,7 +361,2 @@
+ 
+-isValidPrefix = function(str, max) {
+-  const num = Math.floor(Number(str));
+-  return String(num) == str && num >= 0 && num <= max;
+-}
+-
+ // routes POST
+@@ -383,36 +369,8 @@
+ 
+-  req.checkBody('target', 'Target network is required').notEmpty();
+-  req.sanitize('target').trim();
+-  req.checkBody('target', 'Target network must be valid CIDR format')
+-    .custom(value => {
+-      const parts = value.split('/');
+-      const ipv4 = new ipaddr.Address4(parts[0]);
+-      const ipv6 = new ipaddr.Address6(parts[0]);
+-      let isValidIPv4orIPv6 = false;
+-      let prefixMax = 32;
+-      if (ipv4.isValid()) {
+-        isValidIPv4orIPv6 = true;
+-      } else {
+-      }
+-      if (ipv6.isValid()) {
+-        isValidIPv4orIPv6 = true;
+-        prefixMax = 128;
+-      } else {
+-      }
+-      return isValidIPv4orIPv6 && isValidPrefix(parts[1], prefixMax);
+-    });
+-  req.checkBody('via', 'Gateway must be a valid IPv4 or IPv6 address').optional({ checkFalsy: true }).isIP();
+-  req.sanitize('via').escape();
+-  req.sanitize('via').trim();
+-  if (! req.body.via) {
+-    req.body.via = null;
+-  }
+-
+-  const errors = req.validationErrors();
+-
+-  const route =
+-    {
+-      target: req.body.target,
+-      via: req.body.via
+-    };
++  const target = addresses.trim(req.body.target);
++  const via = addresses.trim(req.body.via);
++  const errors = addresses.validRoute(target, via)
++    ? null : [{msg: 'Target must be valid CIDR and gateway must use the same address family'}];
++  const route = {target, via: via === '' || via === undefined ? null : via};
++  if (errors) res.status(400);
+ 
+@@ -451,2 +409,4 @@
+     };
++
++  if (!addresses.cidr(route.target)) return res.status(400).send('Target network must be valid CIDR format');
+ 
+@@ -564,14 +524,15 @@
+ 
+-  const dns = {
+-    dns: {
+-      domain: req.body.domain,
+-      servers: req.body.servers
+-        .split('\n')
+-        .map(x => x.trim())
+-        .filter(ip =>
+-          new ipaddr.Address4(ip).isValid() ||
+-          new ipaddr.Address6(ip).isValid()
+-        )
+-    }
+-  };
++  const domain = addresses.trim(req.body.domain);
++  const servers = addresses.dnsServers(req.body.servers);
++  if (typeof domain !== 'string' || domain.length > 253 || /[\s\x00-\x1f\x7f]/.test(domain) || servers === null) {
++    try {
++      const network = await zt.network_detail(req.params.nwid);
++      navigate.whence = '/controller/network/' + network.nwid;
++      return res.status(400).render('dns', {title: 'dns', navigate, network,
++        errors: [{msg: 'DNS domain and server addresses must be valid; no configuration was changed'}]});
++    } catch (err) {
++      return res.status(502).send('Error resolving network detail');
++    }
++  }
++  const dns = {dns: {domain, servers}};
+ 
+@@ -670,5 +631,4 @@
+     .custom(value => {
+-      const parts = value.split('/');
+-      const ipv4 = new ipaddr.Address4(parts[0]);
+-      return ipv4.isValid() && isValidPrefix(parts[1], 32);
++      const parsed = addresses.cidr(value);
++      return Boolean(parsed && parsed.family === 4);
+     });
+@@ -883,27 +843,8 @@
+ 
+-  req.checkBody('ipAddress', 'IP address required').notEmpty();
+-  req.checkBody('ipAddress', 'IP address must be a valid IPv4 or IPv6 address').isIP();
+-  req.checkBody('ipAddress', 'IP address must fall within a managed route')
+-    .custom(value => {
+-      let ipAddressInManagedRoute = false;
+-      network.routes.forEach(function(item) {
+-        let ipv4 = new ipaddr.Address4(value);
+-        let target4 = new ipaddr.Address4(item.target);
+-        if (ipv4.isValid() && target4.isValid()) {
+-          if (ipv4.isInSubnet(target4)) ipAddressInManagedRoute =  true;
+-        }
+-        let ipv6 = new ipaddr.Address6(value);
+-        let target6 = new ipaddr.Address6(item.target);
+-        if (ipv6.isValid() && target6.isValid()) {
+-          if (ipv6.isInSubnet(target6)) ipAddressInManagedRoute =  true;
+-        }
+-      });
+-      return ipAddressInManagedRoute;
+-    });
+-  req.sanitize('ipAddress').escape();
+-  req.sanitize('ipAddress').trim();
+-
+-  const errors = req.validationErrors();
+-
+-  const ipAssignment = { ipAddress: req.body.ipAddress };
++  const ipAddress = addresses.trim(req.body.ipAddress);
++  const routes = Array.isArray(network.routes) ? network.routes : [];
++  const errors = addresses.family(ipAddress) && routes.some(route => route && addresses.inSubnet(ipAddress, route.target))
++    ? null : [{msg: 'IP address must be valid and fall within a managed route of the same address family'}];
++  const ipAssignment = {ipAddress};
++  if (errors) res.status(400);
+ 
+--- a/src/controllers/zt.js
++++ b/src/controllers/zt.js
+@@ -8 +8 @@
+-const ipaddr = require('ip-address');
++const addresses = require('../addressValidation');
+@@ -195,3 +195,3 @@
+ 
+-  const route_to_del = routes.find(rt => canonicalTarget(rt.target) === route.target);
++  const route_to_del = routes.find(rt => rt && addresses.cidr(rt.target) && canonicalTarget(rt.target) === route.target);
+ 
+@@ -224,8 +224,3 @@
+ function canonicalTarget(target) {
+-  const target6 = new ipaddr.Address6(target);
+-  if (target6.isValid()) {
+-    const parts = target.split('/');
+-    return target6.canonicalForm() + '/' + parts[1];
+-  }
+-  return target;
++  return addresses.canonicalTarget(target);
+ }

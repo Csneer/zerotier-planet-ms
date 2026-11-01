@@ -2,7 +2,7 @@
 
 const crypto = require('crypto');
 const fs = require('fs');
-const got = require('got');
+const controllerHttp = require('../controllerHttp');
 const storage = require('node-persist');
 const statusTools = require('../uiStatus');
 const rootStatus = require('../rootStatus');
@@ -94,8 +94,8 @@ async function getProbe() {
       followRedirect: false
     };
     const [status, peers] = await Promise.all([
-      got(`${address}/status`, options).then(response => response.body),
-      got(`${address}/peer`, options).then(response => response.body)
+      controllerHttp(`${address}/status`, options).then(response => response.body),
+      controllerHttp(`${address}/peer`, options).then(response => response.body)
     ]);
     return {available: true, status, peers: Array.isArray(peers) ? peers : [], error: null};
   } catch (error) {

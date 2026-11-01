@@ -78,6 +78,13 @@ try {
   }
   pass('public entry and login show one brand and concise copy in both languages at 360/390/768/1440px');
   await page.goto(base+'/login?lang=en');
+  assert.deepEqual(await page.evaluate(() => ({
+    collapse: typeof window.jQuery.fn.collapse,
+    tooltip: typeof window.jQuery.fn.tooltip,
+    popover: typeof window.jQuery.fn.popover
+  })), {collapse: 'function', tooltip: 'undefined', popover: 'undefined'});
+  assert.equal((await page.request.get(base+'/bsjs/bootstrap.min.js')).status(), 404);
+  pass('console loads only the required Bootstrap navigation plugins');
   await page.locator('#username').fill('admin'); await page.locator('#password').fill('password');
   await page.locator('button[type=submit]').click();
   if (/\/users\/admin\/password$/.test(page.url())) {

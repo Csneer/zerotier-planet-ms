@@ -53,7 +53,7 @@
 
 ![ZeroTier Planet 控制台：示例 Home Lab 网络、设备别名、IP 分配与成员授权](docs/assets/console-zh-CN.png)
 
-<p align="center"><sub>当前 main 界面实拍 · 隔离演示实例与虚构设备 · 不包含真实部署数据</sub></p>
+<p align="center"><sub>控制台界面实拍 · 隔离演示实例与虚构设备 · 不包含真实部署数据</sub></p>
 
 **常用操作留在眼前，细节需要时再看。** 创建网络、授权成员、修改 MTU、下载 Planet，在同一个界面完成。点击成员可以查看版本、IP、授权和观测路径；较长的配置与诊断放进弹窗，页面保持紧凑。
 
@@ -105,18 +105,18 @@
 
 ### 1. 启动服务
 
-下面拉取与本页界面对应、已通过 CI 的主分支构建，避免在小主机上编译。将 `YOUR_PUBLIC_IPV4` 换成真实公网地址：
+下面拉取正式版本镜像，避免在小主机上编译。将 `YOUR_PUBLIC_IPV4` 换成真实公网地址：
 
 ```bash
 git clone https://github.com/Csneer/zerotier-planet-ms.git
 cd zerotier-planet-ms
 ./install.sh --ip YOUR_PUBLIC_IPV4 --data-dir /srv/zerotier-planet \
-  --pull --image ghcr.io/csneer/ms-zerotier-planet:sha-7308b49
+  --pull --image ghcr.io/csneer/ms-zerotier-planet:v1.3.0
 ```
 
 **IPv6-only**：把 `--ip YOUR_PUBLIC_IPV4` 换为 `--ipv6 YOUR_PUBLIC_IPV6`；**双栈**：同时提供两个参数。已有部署先读[原地升级指南](docs/in-place-upgrade.md)，不要重复初始化。
 
-> 镜像选择：`sha-7308b49` 对应本页演示的[已验证提交](https://github.com/Csneer/zerotier-planet-ms/commit/7308b4911edb0f195724aa924053611382c01a02)；最新正式 Release 为 [`v1.2.0`](https://github.com/Csneer/zerotier-planet-ms/releases/tag/v1.2.0)，尚未包含成员弹窗等后续改动。正式部署可进一步固定 digest。完整[版本与镜像规则](docs/releasing.md)。
+> 当前版本：[`v1.3.0`](https://github.com/Csneer/zerotier-planet-ms/releases/tag/v1.3.0)，包含成员详情、风险处理指引、Node.js 24 与网络输入校验。需要固定部署内容时使用 Release 中记录的镜像 digest。完整[版本与镜像规则](docs/releasing.md)。
 
 ### 2. 打开自己的控制台
 

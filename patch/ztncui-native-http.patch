@@ -1,0 +1,16 @@
+--- a/src/controllers/zt.js
++++ b/src/controllers/zt.js
+@@ -4,11 +4,11 @@
+   Licensed under GPLv3 - see LICENSE for details.
+ */
+ 
+-const got = require('got');
++const got = require('../controllerHttp');
+ const ipaddr = require('ip-address');
+ const token = require('./token');
+ 
+-const ZT_ADDR = process.env.ZT_ADDR || 'localhost:9993';
++const ZT_ADDR = process.env.ZT_ADDR || 'http://localhost:9993';
+ 
+ const init_options = async function() {
+   let tok = null;

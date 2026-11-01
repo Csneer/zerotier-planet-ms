@@ -41,12 +41,14 @@ COPY patch/ztncui-modern.patch /tmp/ztncui-modern.patch
 COPY patch/ztncui-mtu.patch /tmp/ztncui-mtu.patch
 COPY patch/ztncui-downloads.patch /tmp/ztncui-downloads.patch
 COPY patch/ztncui-ui.patch /tmp/ztncui-ui.patch
+COPY patch/ztncui-static-assets.patch /tmp/ztncui-static-assets.patch
 COPY patch/ztncui-monitor.patch /tmp/ztncui-monitor.patch
 RUN cd /opt/ztncui \
     && patch -l -p1 < /tmp/ztncui-modern.patch \
     && patch -l -p1 < /tmp/ztncui-mtu.patch \
     && patch -l -p1 < /tmp/ztncui-downloads.patch \
     && patch -l -p1 < /tmp/ztncui-ui.patch \
+    && patch -l -p1 < /tmp/ztncui-static-assets.patch \
     && patch -l -p1 < /tmp/ztncui-monitor.patch \
     && cd src \
     && npm install --package-lock-only --ignore-scripts \
@@ -57,6 +59,13 @@ RUN cd /opt/ztncui && patch -l -p1 < /tmp/ztncui-network-validation.patch
 COPY patch/networkValidation.js /opt/ztncui/src/public/javascripts/networkValidation.js
 COPY patch/ztncui-roots.patch /tmp/ztncui-roots.patch
 RUN cd /opt/ztncui && patch -l -p1 < /tmp/ztncui-roots.patch
+COPY patch/ztncui-native-http.patch /tmp/ztncui-native-http.patch
+COPY patch/ztncui-address-validation.patch /tmp/ztncui-address-validation.patch
+RUN cd /opt/ztncui \
+    && patch -l -p1 < /tmp/ztncui-native-http.patch \
+    && patch -l -p1 < /tmp/ztncui-address-validation.patch
+COPY patch/controllerHttp.js /opt/ztncui/src/controllerHttp.js
+COPY patch/addressValidation.js /opt/ztncui/src/addressValidation.js
 COPY patch/downloadsController.js /opt/ztncui/src/controllers/downloadsController.js
 COPY patch/monitoringController.js /opt/ztncui/src/controllers/monitoringController.js
 COPY patch/ui-focus.js /opt/ztncui/src/public/javascripts/ui-focus.js
@@ -115,6 +124,7 @@ RUN set -eux; \
 COPY --from=mkworld-builder /src/ZeroTierOne/attic/world/mkworld /usr/local/libexec/mkworld
 COPY --from=ztncui-builder /opt/ztncui /opt/ztncui
 COPY third_party/reicon /usr/share/zerotier-planet/reicon
+COPY third_party/bootstrap /usr/share/zerotier-planet/bootstrap
 COPY patch/entrypoint.sh /usr/local/bin/entrypoint.sh
 COPY patch/healthcheck.sh /usr/local/bin/healthcheck.sh
 LABEL io.ms-zerotier-planet.controller-standby="1"
