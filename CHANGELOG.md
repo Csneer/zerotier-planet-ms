@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## [1.3.0] - 2026-11-01
+
 ### Added
 
 - Member quick-view dialogs with observed client version, assigned IPs, authorization, bridging, active paths, latency and activity; hover and keyboard-focus hints explain observation limits.
@@ -9,19 +11,23 @@
 
 ### Changed
 
+- Reshape the bilingual project introduction around encrypted private networking, with isolated console screenshots, a comparison guide and separate operations documentation.
+- Update docker/login-action to v4.7.0.
 - Move the Web console build and runtime images to Node.js 24 LTS, and align browser CI with Node.js 24; Node.js 20 reached end of support on 2026-04-30.
 - Open secondary settings, diagnostics and raw data in responsive dialogs with keyboard focus handling, Escape/backdrop dismissal and native disclosure fallback, keeping the main page height stable.
 - Keep member details synchronized after saves and rollbacks, and present missing path observations as unknown instead of asserting a device is offline.
 
 ### Fixed
 
+- Validate advanced route, DNS and address inputs before writing Controller configuration, rejecting ambiguous IPs, malformed prefixes and incompatible address families while preserving the previous configuration on failure.
 - Recover a failed generated-mode upgrade pinned by image digest through a private resolved Compose configuration, preserving mounts and literal environment values without attempting to retag the immutable digest; external-mode rollback remains manual.
 - Preserve unknown monitoring latency instead of converting missing or invalid values to `0 ms` in service and probe observations.
 - Reject data paths with dotenv interpolation, quoting or escape characters before installation writes configuration or creates persistent directories.
 
 ### Security
 
-- Require body-parser 1.20.9 or newer in the 1.x line and qs 6.17.1 or newer in the 6.x line to address known request-parser denial-of-service advisories. Other legacy upstream dependencies still require separate compatibility work.
+- Require body-parser 1.20.9 or newer in the 1.x line and qs 6.17.1 or newer in the 6.x line to address known request-parser denial-of-service advisories.
+- Replace got with an HTTP(S)-only native client that refuses redirects, upgrade ip-address to the fixed 10.7.x line, and serve only the licensed Bootstrap styles and navigation plugins used by the console.
 
 ## [1.2.0] - 2026-10-26
 
@@ -129,6 +135,7 @@ First project release; earlier unversioned changes are collected here without in
 - Optional probe state is mounted read-only and its local API token is never exposed in the Web response.
 - Controller standby startup refuses missing/staged/fenced guards, stale Moon files, Root membership of a Controller-only identity and non-capability images.
 
+[1.3.0]: https://github.com/Csneer/zerotier-planet-ms/releases/tag/v1.3.0
 [1.2.0]: https://github.com/Csneer/zerotier-planet-ms/releases/tag/v1.2.0
 [1.1.0]: https://github.com/Csneer/zerotier-planet-ms/releases/tag/v1.1.0
 [1.0.0]: https://github.com/Csneer/zerotier-planet-ms/releases/tag/v1.0.0

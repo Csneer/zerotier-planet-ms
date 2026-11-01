@@ -1,0 +1,16 @@
+--- a/src/app.js
++++ b/src/app.js
+@@ -46,10 +46,10 @@
+ app.use(cookieParser());
+ app.use(uiLanguage);
+ app.use(express.static(path.join(__dirname, 'public')));
+-app.use('/fonts', express.static(path.join(__dirname, 'node_modules/bootstrap/fonts')));
+-app.use('/bscss', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/css')));
++app.use('/fonts', express.static('/usr/share/zerotier-planet/bootstrap/fonts'));
++app.use('/bscss', express.static('/usr/share/zerotier-planet/bootstrap/css'));
+ app.use('/jqjs', express.static(path.join(__dirname, 'node_modules/jquery/dist')));
+-app.use('/bsjs', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/js')));
++app.use('/bsjs', express.static('/usr/share/zerotier-planet/bootstrap/js'));
+ 
+ app.use('/', index);
+ app.use('/users', users);

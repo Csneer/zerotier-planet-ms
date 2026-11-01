@@ -4,7 +4,7 @@
 
 This guide keeps the full installation, configuration, monitoring and maintenance reference. Run commands from the repository root and replace example public addresses with your actual addresses. For an existing deployment, start with the [in-place upgrade guide (Chinese)](in-place-upgrade.md) rather than rerunning initialization.
 
-**Choose a version:** `v1.2.0` is the current formal release. `main` contains later changes, including member detail dialogs and risk guidance; those features are not part of `v1.2.0`. Prefer a reviewed prebuilt image on a small VM. For main-branch features, choose a Git SHA image that passed CI or build that checkout, and record the image digest.
+**Choose a version:** `v1.3.0` is the current formal release, including member details, actionable risk guidance and the Node.js 24 runtime. Prefer a formal release image on a small VM. To evaluate later main-branch changes, choose a Git SHA image that passed CI or build that checkout, and record the image digest.
 
 **On this page:** [Requirements](#requirements) · [Install](#install) · [Configuration](#configuration) · [Client bootstrap](#client-bootstrap) · [Monitoring](#connection-status-and-monitoring) · [Operations](#operations) · [Backup and removal](#backup-restore-and-removal) · [Security](#security-and-licensing)
 
@@ -87,7 +87,7 @@ Use this project's published image to avoid compiling on a small VM:
 ./install.sh \
   --ip 203.0.113.10 \
   --pull \
-  --image ghcr.io/csneer/ms-zerotier-planet:v1.2.0
+  --image ghcr.io/csneer/ms-zerotier-planet:v1.3.0
 ```
 
 The installer never overwrites an existing `.env` or deletes an existing data directory. A new deployment starts with `admin/password`; change it immediately. The Web UI listens on `127.0.0.1:3443` by default. Set `HTTP_HOST` to the server's ZeroTier address when that is the only listener, or add explicit comma-separated addresses through `HTTP_EXTRA_HOSTS` (for example `HTTP_EXTRA_HOSTS=198.51.100.97`). Subnets and wildcard addresses are rejected for extra listeners. The default Compose deployment does not enable HTTPS; a trusted reverse proxy is recommended when it is needed. Listeners share accounts and session storage, but browser cookies are host-specific, so switching IPs may require signing in again.
@@ -252,11 +252,11 @@ Stop the desktop/server service before replacing files manually. Follow the mobi
 
 ## Versions and image publishing
 
-Project releases use independent SemVer tags (`vX.Y.Z`). The current release is `v1.2.0`, with image `ghcr.io/csneer/ms-zerotier-planet:v1.2.0`. These are distinct from runtime versions such as ZeroTier `1.16.2`. See the [changelog](../CHANGELOG.md) and [release procedure (Chinese)](releasing.md) for repository identity setup, tagging, and GitHub Releases.
+Project releases use independent SemVer tags (`vX.Y.Z`). The current release is `v1.3.0`, with image `ghcr.io/csneer/ms-zerotier-planet:v1.3.0`. These are distinct from runtime versions such as ZeroTier `1.16.2`. See the [changelog](../CHANGELOG.md) and [release procedure (Chinese)](releasing.md) for repository identity setup, tagging, and GitHub Releases.
 
 The [image workflow](../.github/workflows/image-build.yml) validates scripts, Compose, and container regressions before building `linux/amd64` and `linux/arm64` images:
 
-- A release tag `vX.Y.Z` selects `ZT_VERSION` from that tag's `.env.example` (`1.16.2` for `v1.2.0`) and publishes only the project version image, leaving rolling tags unchanged.
+- A release tag `vX.Y.Z` selects `ZT_VERSION` from that tag's `.env.example` (`1.16.2` for `v1.3.0`) and publishes only the project version image, leaving rolling tags unchanged.
 - Pushes to `main`/`master`, weekly builds, and ordinary manual builds continue to track the latest stable ZeroTier release (or a manually specified version), publishing `latest`, ZeroTier version, and Git SHA tags.
 - Record and deploy the image digest when exact image contents must remain fixed. A version tag does not mean every build dependency is locked.
 

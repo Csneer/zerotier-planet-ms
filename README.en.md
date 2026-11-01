@@ -53,7 +53,7 @@ Away from home, your NAS still has its familiar virtual IP. On another network, 
 
 ![ZeroTier Planet console showing a sample Home Lab network, device aliases, assigned IPs and member authorization](docs/assets/console-en.png)
 
-<p align="center"><sub>Current main-branch UI · Isolated demo instance with fictional devices · No production data</sub></p>
+<p align="center"><sub>Console UI · Isolated demo instance with fictional devices · No production data</sub></p>
 
 **Keep everyday actions visible and open details when you need them.** Create networks, authorize members, change MTU and download Planet files in one place. Click a member to inspect its version, IPs, authorization and observed paths. Longer configuration and diagnostic views open in dialogs, keeping the page compact.
 
@@ -105,18 +105,18 @@ Prepare a Linux host with a stable public IPv4 address or globally routable IPv6
 
 ### 1. Start the service
 
-The following uses the CI-verified main-branch image shown on this page, avoiding compilation on the deployment host. Replace `YOUR_PUBLIC_IPV4` with your server's public address:
+The following uses a formal release image, avoiding compilation on the deployment host. Replace `YOUR_PUBLIC_IPV4` with your server's public address:
 
 ```bash
 git clone https://github.com/Csneer/zerotier-planet-ms.git
 cd zerotier-planet-ms
 ./install.sh --ip YOUR_PUBLIC_IPV4 --data-dir /srv/zerotier-planet \
-  --pull --image ghcr.io/csneer/ms-zerotier-planet:sha-7308b49
+  --pull --image ghcr.io/csneer/ms-zerotier-planet:v1.3.0
 ```
 
 **IPv6-only:** replace `--ip YOUR_PUBLIC_IPV4` with `--ipv6 YOUR_PUBLIC_IPV6`. **Dual-stack:** provide both arguments. For an existing deployment, follow the [in-place upgrade guide (Chinese)](docs/in-place-upgrade.md) instead of initializing it again.
 
-> Image choice: `sha-7308b49` corresponds to the [verified commit](https://github.com/Csneer/zerotier-planet-ms/commit/7308b4911edb0f195724aa924053611382c01a02) demonstrated here. The latest formal Release is [`v1.2.0`](https://github.com/Csneer/zerotier-planet-ms/releases/tag/v1.2.0), which does not yet include later member-dialog changes. Pin the image digest when exact deployment contents must remain fixed. See the [version and image rules (Chinese)](docs/releasing.md).
+> Current release: [`v1.3.0`](https://github.com/Csneer/zerotier-planet-ms/releases/tag/v1.3.0), including member details, actionable risk guidance, Node.js 24 and network input validation. Use the image digest recorded in the Release when deployment contents must remain fixed. See the [version and image rules (Chinese)](docs/releasing.md).
 
 ### 2. Open your console
 

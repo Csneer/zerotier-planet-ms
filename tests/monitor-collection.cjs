@@ -20,7 +20,7 @@ const dependencies = {
     if (file === '/var/lib/zerotier-one/planet' || file === '/app/dist/planet') return Buffer.from('test planet');
     throw Object.assign(new Error('fixture not available'), {code: 'ENOENT'});
   }}},
-  got: async url => {
+  '../controllerHttp': async url => {
     if (url === 'http://127.0.0.1:9993/status') return {body: {address: 'cccccccccc', clock: now}};
     if (url === 'http://127.0.0.1:9993/peer') return {body: probePeers};
     throw new Error(`Unexpected probe request: ${url}`);
